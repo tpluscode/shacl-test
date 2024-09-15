@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "bin": {
-    "shacl-test": "./run.sh",
+    "shacl-test": "./run.sh"
+  },
+  "scripts": {
     "release": "changeset publish"
   },
   "keywords": [
