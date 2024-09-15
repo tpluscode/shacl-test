@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+WORKING_DIR="$(pwd)"
 FAILED=0
 
 filter=''
@@ -41,7 +42,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-# check if profile is set
+# check if shapesPath is set
 if [ -z "$shapesPath" ]; then
   printf "*************************************\n"
   printf "* Error: --shapes argument missing. *\n"
@@ -53,13 +54,16 @@ loadFullShape() {
   "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}"
 }
 
+echo $WORKING_DIR
+
 # iterate over valid cases, run validation and monitor exit code
 for file in $validCases; do
   name=$(basename "$file")
+  relativePath=$(realpath --relative-to="$WORKING_DIR" "$file")
 
   # check if filter is set and skip if not matching
   if [ -n "$filter" ] && ! echo "$file" | grep -q "$filter"; then
-    echo "ℹ️SKIP - $name"
+    echo "ℹ️SKIP - $relativePath"
     continue
   fi
 
@@ -75,13 +79,14 @@ for file in $validCases; do
     "$SCRIPT_PATH"/report-failure.sh "$file" "$(loadFullShape "$shapesPath")" "$(cat "$file")"
     FAILED=1
   else
-    echo "✅ PASS - $name"
+    echo "✅ PASS - $relativePath"
   fi
 done
 
 # iterate over invalid cases
 for file in $invalidCases; do
   name=$(basename "$file")
+  relativePath=$(realpath --relative-to="$WORKING_DIR" "$file")
 
   # skip if file does not exist
   if [ ! -f "$file" ]; then
@@ -90,7 +95,7 @@ for file in $invalidCases; do
 
   # check if pattern is set and skip if not matching
   if [ -n "$filter" ] && ! echo "$file" | grep -q "$filter"; then
-    echo "ℹ️SKIP - $name"
+    echo "ℹ️SKIP - $relativePath"
     continue
   fi
 

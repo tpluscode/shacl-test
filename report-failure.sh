@@ -1,7 +1,7 @@
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 file=$1
-name=$(basename "$file")
+relativePath=$(realpath --relative-to="$(pwd)" "$file")
 
 message=$4
 if [ -z "$message" ]; then
@@ -9,7 +9,7 @@ if [ -z "$message" ]; then
 fi
 
 playground=$("$SCRIPT_PATH"/shorten-report.js "$2" "$3")
-echo "❌ FAIL - $name. $message: $playground"
+echo "❌ FAIL - $relativePath. $message: $playground"
 
 # git diff non interactive
 if [ -f "$1".approved.txt ]; then
