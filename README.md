@@ -23,6 +23,8 @@ npx shacl-test \
 
 Only the `--shapes` option is required. The rest are optional.
 
+`--shapes` can be a filesystem path or URL and include [`code:imports`](https://github.com/zazuko/rdf-transform-graph-imports).
+
 `--valid-cases` and `--invalid-cases` are globs that match the test cases. 
 Make sure to put them in quotes to avoid shell expansion.
 
