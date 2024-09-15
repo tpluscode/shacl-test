@@ -54,8 +54,6 @@ loadFullShape() {
   "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}"
 }
 
-echo $WORKING_DIR
-
 # iterate over valid cases, run validation and monitor exit code
 for file in $validCases; do
   name=$(basename "$file")
