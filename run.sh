@@ -4,6 +4,7 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 FAILED=0
 
 filter=''
+debug=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -12,6 +13,9 @@ while [ $# -gt 0 ]; do
       ;;
     --approve)
       approvalsFlags='-f'
+      ;;
+    --debug)
+      debug=true
       ;;
     --filter=*)
       filter="${1#*=}"
@@ -55,7 +59,7 @@ for file in $validCases; do
   fi
 
   {
-    if [ "$DEBUG" = true ]; then
+    if [ "$debug" = true ]; then
       echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
     fi
     npx shacl validate --shapes "$shapesPath" > "$file.log" 2>&1
@@ -85,7 +89,7 @@ for file in $invalidCases; do
     continue
   fi
 
-    if [ "$DEBUG" = true ]; then
+    if [ "$debug" = true ]; then
       echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
     fi
   report=$(npx b59 shacl validate --shapes "$shapesPath" < "$file" 2> "$file.log" | "$SCRIPT_PATH"/pretty-print.js)
