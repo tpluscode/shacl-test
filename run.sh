@@ -5,6 +5,7 @@ FAILED=0
 
 filter=''
 debug=false
+prefixes=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -26,6 +27,10 @@ while [ $# -gt 0 ]; do
     --invalid-cases=*)
       invalidCases="${1#*=}"
       ;;
+    --prefixes=*)
+      IFS=',' read -r -a tempPrefixes <<< "${1#*=}"
+      prefixes+=("${tempPrefixes[@]}")
+      ;;
     *)
       printf "*******************************************\n"
       printf "* Error: Invalid argument: %s *\n" "$1"
@@ -45,7 +50,7 @@ if [ -z "$shapesPath" ]; then
 fi
 
 loadFullShape() {
-  "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js
+  "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}"
 }
 
 # iterate over valid cases, run validation and monitor exit code
@@ -62,7 +67,7 @@ for file in $validCases; do
     if [ "$debug" = true ]; then
       echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
     fi
-    npx shacl validate --shapes "$shapesPath" > "$file.log" 2>&1
+    npx b59 shacl validate --shapes "$shapesPath" > "$file.log" 2>&1
     success=$?
   } < "$file"
 
@@ -92,7 +97,7 @@ for file in $invalidCases; do
     if [ "$debug" = true ]; then
       echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
     fi
-  report=$(npx b59 shacl validate --shapes "$shapesPath" < "$file" 2> "$file.log" | "$SCRIPT_PATH"/pretty-print.js)
+  report=$(npx b59 shacl validate --shapes "$shapesPath" < "$file" 2> "$file.log" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}")
 
   if ! echo "$report" | npx approvals "$name" --outdir "$(basepath file)" "$approvalsFlags" > /dev/null 2>&1 ; then
     "$SCRIPT_PATH"/report-failure.sh "$file" "$(loadFullShape "$shapesPath")" "$(cat "$file")" "check results"
