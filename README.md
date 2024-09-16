@@ -18,7 +18,8 @@ npx shacl-test \
   --invalid-cases="${INVALID_CASES_GLOB}" \
   --approve \
   --debug \
-  --prefixes=${PREFIXES}
+  --prefixes=${PREFIXES} \
+  --command="${COMMAND}"
 ```
 
 Only the `--shapes` option is required. The rest are optional.
@@ -36,3 +37,6 @@ Make sure to put them in quotes to avoid shell expansion.
 For example, `--prefixes=schema,qudt,cube=https://cube.link/`, will declare the prefixes
 `schema`, `qudt` and `cube` with the respective URIs. In the case of `schema` and `qudt`, their
 URIs are taken from the list provided by the [`@zazuko/prefixes`](https://github.com/zazuko/rdf-vocabularies/blob/master/packages/prefixes/prefixes.ts) package (and, by extension, the [Zazuko prefix server](https://prefix.zazuko.com)).
+
+`--command` is a command to run for each test case. It will be passed the shapes path as argument and the test case on standard input. The default is `npx barnard59 shacl validate --shapes`, which translates to `npx barnard59 shacl validate --shapes ${shapes} < $testCase`. The script must return a non-zero exit code if the test case is invalid.
+
