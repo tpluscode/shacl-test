@@ -16,6 +16,7 @@ npx shacl-test \
   --shapes=${SHAPES} \
   --valid-cases="${VALID_CASES_GLOB}" \
   --invalid-cases="${INVALID_CASES_GLOB}" \
+  --filter="${FILTER}" \
   --approve \
   --debug \
   --prefixes=${PREFIXES} \
@@ -28,6 +29,8 @@ Only the `--shapes` option is required. The rest are optional.
 
 `--valid-cases` and `--invalid-cases` are globs that match the test cases. 
 Make sure to put them in quotes to avoid shell expansion.
+
+`--filter` is a regular expression to filter the test cases.
 
 `--approve` will approve the validation reports for the negative test cases instead of failing.
 
