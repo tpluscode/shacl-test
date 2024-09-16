@@ -7,6 +7,7 @@ FAILED=0
 filter=''
 debug=false
 prefixes=()
+command="npx barnard59 shacl validate --shapes"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -32,6 +33,9 @@ while [ $# -gt 0 ]; do
       IFS=',' read -r -a tempPrefixes <<< "${1#*=}"
       prefixes+=("${tempPrefixes[@]}")
       ;;
+    --command=*)
+      command="${1#*=}"
+      ;;
     *)
       printf "*******************************************\n"
       printf "* Error: Invalid argument: %s *\n" "$1"
@@ -50,6 +54,14 @@ if [ -z "$shapesPath" ]; then
   exit 1
 fi
 
+command="$command $shapesPath"
+if [ "$debug" = true ]; then
+  echo "🐞 Command: $command"
+  echo "🐞 Filter: $filter"
+  echo "🐞 Approval flags: $approvalsFlags"
+  echo ""
+fi
+
 loadFullShape() {
   "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}"
 }
@@ -57,7 +69,7 @@ loadFullShape() {
 # iterate over valid cases, run validation and monitor exit code
 for file in $validCases; do
   name=$(basename "$file")
-  relativePath=$(realpath --relative-to="$WORKING_DIR" "$file")
+  relativePath=$(node -e "console.log(require('path').relative('$WORKING_DIR', '$file'))")
 
   # check if filter is set and skip if not matching
   if [ -n "$filter" ] && ! echo "$file" | grep -q "$filter"; then
@@ -66,10 +78,7 @@ for file in $validCases; do
   fi
 
   {
-    if [ "$debug" = true ]; then
-      echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
-    fi
-    npx b59 shacl validate --shapes "$shapesPath" > "$file.log" 2>&1
+    sh -c "$command" > "$file.log" 2>&1
     success=$?
   } < "$file"
 
@@ -84,7 +93,7 @@ done
 # iterate over invalid cases
 for file in $invalidCases; do
   name=$(basename "$file")
-  relativePath=$(realpath --relative-to="$WORKING_DIR" "$file")
+  relativePath=$(node -e "console.log(require('path').relative('$WORKING_DIR', '$file'))")
 
   # skip if file does not exist
   if [ ! -f "$file" ]; then
@@ -97,12 +106,9 @@ for file in $invalidCases; do
     continue
   fi
 
-    if [ "$debug" = true ]; then
-      echo "🐞 npx b59 shacl validate --shapes $shapesPath < $file"
-    fi
-  report=$(npx b59 shacl validate --shapes "$shapesPath" < "$file" 2> "$file.log" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}")
+  report=$(sh -c "$command" < "$file" 2> "$file.log" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}")
 
-  if ! echo "$report" | npx approvals "$name" --outdir "$(basepath file)" "$approvalsFlags" > /dev/null 2>&1 ; then
+  if ! echo "$report" | npx approvals "$name" --outdir "$(dirname "$file")" "$approvalsFlags" > /dev/null 2>&1 ; then
     "$SCRIPT_PATH"/report-failure.sh "$file" "$(loadFullShape "$shapesPath")" "$(cat "$file")" "check results"
     FAILED=1
   else
