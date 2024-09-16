@@ -1,7 +1,7 @@
 SCRIPT_PATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 file=$1
-relativePath=$(realpath --relative-to="$(pwd)" "$file")
+relativePath=$(node -e "console.log(require('path').relative('$(pwd)', '$file'))")
 
 message=$4
 if [ -z "$message" ]; then
