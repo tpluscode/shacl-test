@@ -72,7 +72,7 @@ for file in $validCases; do
   relativePath=$(node -e "console.log(require('path').relative('$WORKING_DIR', '$file'))")
 
   # check if filter is set and skip if not matching
-  if [ -n "$filter" ] && ! echo "$file" | grep -q "$filter"; then
+  if [ -n "$filter" ] && ! echo "$file" | grep -iq "$filter"; then
     echo "ℹ️SKIP - $relativePath"
     continue
   fi
@@ -101,7 +101,7 @@ for file in $invalidCases; do
   fi
 
   # check if pattern is set and skip if not matching
-  if [ -n "$filter" ] && ! echo "$file" | grep -q "$filter"; then
+  if [ -n "$filter" ] && ! echo "$file" | grep -iq "$filter"; then
     echo "ℹ️SKIP - $relativePath"
     continue
   fi
