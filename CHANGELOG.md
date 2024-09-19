@@ -1,5 +1,11 @@
 # @zazuko/shacl-test
 
+## 0.1.1
+
+### Patch Changes
+
+- 0a192ef: Make `--filter` case-insensitive
+
 ## 0.1.0
 
 ### Minor Changes
