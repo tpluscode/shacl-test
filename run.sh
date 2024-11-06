@@ -66,8 +66,12 @@ loadFullShape() {
   "$SCRIPT_PATH"/load-graph.js "$1" | "$SCRIPT_PATH"/pretty-print.js --prefixes "${prefixes[@]}"
 }
 
+testsRun=0
+
 # iterate over valid cases, run validation and monitor exit code
 for file in $validCases; do
+  testsRun=$((testsRun + 1))
+
   name=$(basename "$file")
   relativePath=$(node -e "console.log(require('path').relative('$WORKING_DIR', '$file'))")
 
@@ -92,6 +96,8 @@ done
 
 # iterate over invalid cases
 for file in $invalidCases; do
+  testsRun=$((testsRun + 1))
+
   name=$(basename "$file")
   relativePath=$(node -e "console.log(require('path').relative('$WORKING_DIR', '$file'))")
 
@@ -115,5 +121,18 @@ for file in $invalidCases; do
     echo "✅ PASS - $name"
   fi
 done
+
+if [ $testsRun -eq 0 ]; then
+  echo "ℹ️ No test cases found"
+  echo "ℹ️ Check if the --valid-cases and --invalid-cases globs match any files"
+  exit 255
+fi
+
+echo "🏁 Tests cases run: $testsRun"
+if [ $FAILED -eq 0 ]; then
+  echo "🎉 All tests passed"
+else
+  echo "❌ Failed $FAILED tests"
+fi
 
 exit $FAILED
