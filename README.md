@@ -23,7 +23,9 @@ npx shacl-test \
   --command="${COMMAND}"
 ```
 
-Only the `--shapes` option is required. The rest are optional.
+The `--shapes` option is required. 
+Also, you must provide at least `--valid-cases` or `--invalid-cases`, lest no tests are run. 
+The rest are optional.
 
 `--shapes` can be a filesystem path or URL and include [`code:imports`](https://github.com/zazuko/rdf-transform-graph-imports).
 
